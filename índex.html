@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FitMove">
+<title>FitMove 💪</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background:#0d0d0d;
+  color:#fff;
+  font-family:-apple-system, sans-serif;
+  min-height:100vh;
+}
+header {
+  background:linear-gradient(135deg,#ff6b00,#ff9500);
+  padding:20px;
+  text-align:center;
+  position:sticky;
+  top:0;
+  z-index:100;
+}
+header h1 { font-size:1.8em; font-weight:800; }
+header p { font-size:0.85em; opacity:0.9; margin-top:4px; }
+.muscles-grid {
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+  padding:20px;
+}
+.muscle-btn {
+  background:#1a1a1a;
+  border:2px solid #333;
+  border-radius:16px;
+  padding:20px 10px;
+  text-align:center;
+  cursor:pointer;
+  color:#fff;
+  transition:all 0.2s;
+}
+.muscle-btn.active {
+  border-color:#ff6b00;
+  background:#2a1500;
+}
+.muscle-btn .icon { font-size:2.2em; margin-bottom:8px; }
+.muscle-btn .name { font-size:0.95em; font-weight:600; }
+.exercises-page {
+  display:none;
+  padding-bottom:40px;
+}
+.exercises-page.visible { display:block; }
+.back-btn {
+  background:#ff6b00;
+  color:#fff;
+  border:none;
+  padding:12px 20px;
+  margin:16px 20px;
+  border-radius:12px;
+  font-size:1em;
+  font-weight:600;
+  cursor:pointer;
+  display:block;
+}
+.section-title {
+  padding:0 20px 16px;
+  font-size:1.3em;
+  font-weight:800;
+  color:#ff6b00;
+}
+.exercise-card {
+  background:#1a1a1a;
+  border-radius:16px;
+  margin:0 20px 16px;
+  overflow:hidden;
+  border:1px solid #2a2a2a;
+}
+.exercise-card img {
+  width:100%;
+  height:200px;
+  object-fit:cover;
+  background:#111;
+}
+.exercise-info { padding:14px; }
+.exercise-info h3 { font-size:1.1em; font-weight:700; margin-bottom:6px; }
+.exercise-info p { font-size:0.88em; color:#aaa; line-height:1.5; margin-bottom:10px; }
+.tags { display:flex; flex-wrap:wrap; gap:6px; }
+.tag {
+  background:#ff6b0022;
+  color:#ff9500;
+  border:1px solid #ff6b0044;
+  border-radius:20px;
+  padding:3px 10px;
+  font-size:0.78em;
+  font-weight:600;
+}
+.home-page { display:block; }
+.home-page.hidden { display:none; }
+</style>
+</head>
+<body>
+
+<div class="home-page" id="home">
+  <header>
+    <h1>💪 FitMove</h1>
+    <p>Choisis un muscle à travailler</p>
+  </header>
+  <div class="muscles-grid">
+    <div class="muscle-btn" onclick="showMuscle('pectoraux')">
+      <div class="icon">🫁</div>
+      <div class="name">Pectoraux</div>
+    </div>
+    <div class="muscle-btn" onclick="showMuscle('dos')">
+      <div class="icon">🔙</div>
+      <div class="name">Dos</div>
+    </div>
+    <div class="muscle-btn" onclick="showMuscle('epaules')">
+      <div class="icon">🔝</div>
+      <div class="name">Épaules</div>
+    </div>
+    <div class="muscle-btn" onclick="showMuscle('biceps')">
+      <div class="icon">💪</div>
+      <div class="name">Biceps</div>
+    </div>
+    <div class="muscle-btn" onclick="showMuscle('triceps')">
+      <div class="icon">🦾</div>
+      <div class="name">Triceps</div>
+    </div>
+    <div class="muscle-btn" onclick="showMuscle('jambes')">
+      <div class="icon">🦵</div>
+      <div class="name">Jambes</div>
+    </div>
+    <div class="muscle-btn" onclick="showMuscle('abdos')">
+      <div class="icon">⬛</div>
+      <div class="name">Abdominaux</div>
+    </div>
+    <div class="muscle-btn" onclick="showMuscle('fessiers')">
+      <div class="icon">🍑</div>
+      <div class="name">Fessiers</div>
+    </div>
+  </div>
+</div>
+
+<div class="exercises-page" id="exercises-page">
+  <header>
+    <h1>💪 FitMove</h1>
+    <p id="header-subtitle">Exercices</p>
+  </header>
+  <button class="back-btn" onclick="goBack()">← Retour</button>
+  <div class="section-title" id="section-title"></div>
+  <div id="exercises-list"></div>
+</div>
+<script>
+const data = {
+  pectoraux: {
+    label: "🫁 Pectoraux",
+    exercices: [
+      {
+        nom: "Pompes classiques",
+        desc: "Au sol, mains à largeur d'épaules, descendez la poitrine vers le sol puis remontez. Gardez le corps bien droit.",
+        tags: ["Pectoraux", "Triceps", "Core"],
+        gif: "https://media.giphy.com/media/xT9IgG50Lg7rusyOLu/giphy.gif"
+      },
+      {
+        nom: "Développé couché",
+        desc: "Allongé sur un banc, descendez la barre vers la poitrine puis poussez vers le haut.",
+        tags: ["Pectoraux", "Triceps", "Épaules"],
+        gif: "https://media.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif"
+      },
+      {
+        nom: "Écarté haltères",
+        desc: "Allongé, bras tendus, ouvrez en arc de cercle puis revenez. Étire bien les pectoraux.",
+        tags: ["Pectoraux", "Épaules"],
+        gif: "https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif"
+      },
+      {
+        nom: "Dips",
+        desc: "Entre deux barres, descendez en pliant les coudes puis remontez. Penchez le buste en avant.",
+        tags: ["Pectoraux", "Triceps"],
+        gif: "https://media.giphy.com/media/xT9IgG50Lg7rusyOLu/giphy.gif"
+      }
+    ]
+  },
+  dos: {
+    label: "🔙 Dos",
+    exercices: [
+      {
+        nom: "Tractions",
+        desc: "Accrochez-vous à une barre, tirez votre corps vers le haut jusqu'au menton.",
+        tags: ["Grand dorsal", "Biceps"],
+        gif: "https://media.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif"
+      },
+      {
+        nom: "Rowing haltère",
+        desc: "Un genou sur un banc, tirez l'haltère vers la hanche en gardant le dos droit.",
+        tags: ["Dos", "Biceps", "Trapèzes"],
+        gif: "https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif"
+      },
+      {
+        nom: "Soulevé de terre",
+        desc: "Pieds écartés, dos droit, soulevez la barre depuis le sol jusqu'à la position debout.",
+        tags: ["Dos", "Jambes", "Fessiers"],
+        gif: "https://media.giphy.com/media/xT9IgG50Lg7rusyOLu/giphy.gif"
+      },
+      {
+        nom: "Tirage poitrine",
+        desc: "À la poulie haute, tirez la
+        barre vers la poitrine en écartant les coudes.",
+        tags: ["Grand dorsal", "Biceps"],
+        gif: "https://media.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif"
+      }
+    ]
+  },
+  epaules: {
+    label: "🔝 Épaules",
+    exercices: [
+      {
+        nom: "Développé militaire",
+        desc: "Debout ou assis, poussez la barre au-dessus de la tête bras tendus.",
+        tags: ["Épaules", "Triceps"],
+        gif: "https://media.giphy.com/media/xT9IgG50Lg7rusyOLu/giphy.gif"
+      },
+      {
+        nom: "Élévations latérales",
+        desc: "Haltères en main, levez les bras sur les côtés jusqu'à hauteur des épaules.",
+        tags: ["Épaules", "Deltoïdes"],
+        gif: "https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif"
+      },
+      {
+        nom: "Oiseau haltères",
+        desc: "Penché en avant, levez les bras sur les côtés pour travailler les deltoïdes arrière.",
+        tags: ["Épaules arrière", "Dos"],
+        gif: "https://media.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif"
+      }
+    ]
+  },
+  biceps: {
+    label: "💪 Biceps",
+    exercices: [
+      {
+        nom: "Curl haltères",
+        desc: "Debout, fléchissez les coudes pour ramener les haltères vers les épaules.",
+        tags: ["Biceps", "Avant-bras"],
+        gif: "https://media.giphy.com/media/xT9IgG50Lg7rusyOLu/giphy.gif"
+      },
+      {
+        nom: "Curl barre",
+        desc: "Même mouvement avec une barre droite pour plus de charge.",
+        tags: ["Biceps"],
+        gif: "https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif"
+      },
+      {
+        nom: "Curl marteau",
+        desc: "Haltères en prise neutre (pouces vers le haut), fléchissez les coudes.",
+        tags: ["Biceps", "Brachio-radial"],
+        gif: "https://media.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif"
+      }
+    ]
+  },
+  triceps: {
+    label: "🦾 Triceps",
+    exercices: [
+      {
+        nom: "Extension triceps",
+        desc: "Haltère au-dessus de la tête, descendez derrière la nuque puis remontez.",
+        tags: ["Triceps"],
+        gif: "https://media.giphy.com/media/xT9IgG50Lg7rusyOLu/giphy.gif"
+      },
+      {
+        nom: "Barre front",
+        desc: "Allongé, descendez la barre vers le front en pliant les coudes.",
+        tags: ["Triceps"],
+        gif: "https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif"
+      },
+      {
+        nom: "Pompes serrées",
+        desc: "Mains rapprochées sous la poitrine, faites des pompes pour cibler les triceps.",
+        tags: ["Triceps", "Pectoraux"],
+        gif: "https://media.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif"
+      }
+    ]
+  },
+  jambes: {
+    label: "🦵 Jambes",
+    exercices: [
+      {
+        nom: "Squat",
+        desc: "Pieds écartés, descendez comme pour vous asseoir, dos droit, puis remontez.",
+        tags: ["Quadriceps", "Fessiers", "Ischio"],
+        gif: "https://media.giphy.com/media/xT9IgG50Lg7rusyOLu/giphy.gif"
+      },
+      {
+        nom: "Fentes",
+        desc: "Un pied devant, descendez le genou arrière vers le sol puis remontez.",
+        tags: ["Quadriceps", "Fessiers"],
+        gif: "https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif"
+      },
+      {
+        nom: "Leg press",
+        desc: "Sur la machine, poussez la plateforme avec les pieds sans verrouiller les genoux.",
+        tags: ["Quadriceps", "Fessiers"],
+        gif: "https://media.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif"
+      },
+      {
+        nom: "Mollets debout",
+        desc: "Sur une marche, montez sur la pointe des pieds puis redescendez lentement.",
+        tags: ["Mollets"],
+        gif: "https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif"
+      }
+    ]
+  },
+  abdos: {
+    label: "⬛ Abdominaux",
+    exercices: [
+      {
+        nom: "Crunchs",
+        desc: "Sur le dos, genoux fléchis, soulevez les épaules vers les genoux.",
+        tags: ["Abdos", "Core"],
+        gif: "https://media.giphy.com/media/xT9IgG50Lg7rusyOLu/giphy.gif"
+      },
+      {
+        nom: "Planche",
+        desc: "En appui sur les avant-bras et les orteils, maintenez le corps droit le plus longtemps possible.",
+        tags: ["Core", "Abdos", "Dos"],
+        gif: "https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif"
+      },
+      {
+        nom: "Relevé de jambes",
+        desc: "Allongé, levez les jambes tendues à 90° puis redescendez sans toucher le sol.",
+        tags: ["Abdos bas", "Core"],
+        gif: "https://media.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif"
+      },
+      {
+        nom: "Russian twist",
+        desc: "Assis, pieds levés, tournez le buste de gauche à droite avec un poids.",
+        tags: ["Obliques", "Abdos"],
+        gif: "https://media.giphy.com/media/xT9IgG50Lg7rusyOLu/giphy.gif"
+      }
+    ]
+  },
+  fessiers: {
+    label: "🍑 Fessiers",
+    exercices: [
+      {
+        nom: "Hip thrust",
+        desc: "Dos sur un banc, poussez les hanches vers le haut avec une barre sur les hanches.",
+        tags: ["Fessiers", "Ischio"],
+        gif: "https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif"
+      },
+      {
+        nom: "Squat sumo",
+        desc: "Pieds très écartés, orteils tournés dehors, descendez profondément.",
+        tags: ["Fessiers", "Adducteurs"],
+        gif: "https://media.giphy.com/media/xT9IgG50Lg7rusyOLu/giphy.gif"
+      },
+      {
+        nom: "Donkey kicks",
+        desc: "À 4 pattes, poussez un talon vers le plafond en contractant le fessier.",
+        tags: ["Fessiers"],
+        gif: "https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif"
+      }
+    ]
+  }
+};
+
+function showMuscle(muscle) {
+  const d = data[muscle];
+  document.getElementById('home').classList.add('hidden');
+  document.getElementById('header-subtitle').textContent = d.label;
+  document.getElementById('section-title').textContent = d.label;
+  const list = document.getElementById('exercises-list');
+  list.innerHTML = '';
+  d.exercices.forEach(ex => {
+    list.innerHTML += `
+      <div class="exercise-card">
+        <img src="${ex.gif}" alt="${ex.nom}" loading="lazy"/>
+        <div class="exercise-info">
+          <h3>${ex.nom}</h3>
+          <p>${ex.desc}</p>
+          <div class="tags">
+            ${ex.tags.map(t => `<span class="tag">${t}</span>`).join('')}
+          </div>
+        </div>
+      </div>`;
+  });
+  document.getElementById('exercises-page').classList.add('visible');
+}
+
+function goBack() {
+  document.getElementById('exercises-page').classList.remove('visible');
+  document.getElementById('home').classList.remove('hidden');
+}
+</script>
+</body>
+</html>
