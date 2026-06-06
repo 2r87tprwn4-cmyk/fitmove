@@ -6,41 +6,36 @@
 <title>FitMove 💪</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-body { background:#0d0d0d; color:#fff; font-family:-apple-system, sans-serif; min-height:100vh; }
-header { background:linear-gradient(135deg,#ff6b00,#ff9500); padding:20px; text-align:center; }
+body { background:#0d0d0d; color:#fff; font-family:-apple-system, sans-serif; }
+header { background:linear-gradient(135deg,#ff6b00,#ff9500); padding:20px; text-align:center; position:sticky; top:0; z-index:100; }
 header h1 { font-size:1.8em; font-weight:800; }
 header p { font-size:0.85em; opacity:0.9; margin-top:4px; }
 .muscles-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; padding:20px; }
 .muscle-btn { background:#1a1a1a; border:2px solid #333; border-radius:16px; padding:20px 10px; text-align:center; cursor:pointer; transition:all 0.2s; }
-.muscle-btn:hover, .muscle-btn:active { border-color:#ff6b00; background:#2a1500; }
+.muscle-btn:active { border-color:#ff6b00; background:#2a1500; transform:scale(0.97); }
 .muscle-btn .icon { font-size:2.5em; margin-bottom:8px; }
 .muscle-btn .name { font-size:0.95em; font-weight:600; }
-.exercises-page { display:none; padding-bottom:60px; }
-.exercises-page.visible { display:block; }
-.home-page.hidden { display:none; }
-.back-btn { background:#ff6b00; color:#fff; border:none; padding:12px 20px; margin:16px 20px; border-radius:12px; font-size:1em; font-weight:600; cursor:pointer; display:block; width:calc(100% - 40px); }
+.page { display:none; }
+.page.visible { display:block; padding-bottom:40px; }
+.back-btn { background:#ff6b00; color:#fff; border:none; padding:14px 20px; margin:16px 20px; border-radius:12px; font-size:1em; font-weight:600; cursor:pointer; display:block; width:calc(100% - 40px); }
 .section-title { padding:0 20px 16px; font-size:1.4em; font-weight:800; color:#ff6b00; }
 .exercise-card { background:#1a1a1a; border-radius:16px; margin:0 20px 20px; overflow:hidden; border:1px solid #2a2a2a; }
-.gif-container { width:100%; height:220px; background:#111; display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative; }
-.gif-container img { width:100%; height:100%; object-fit:cover; display:block; }
-.fallback-box { width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:linear-gradient(135deg,#1a1500,#2a1500); gap:10px; padding:20px; }
-.fallback-box .big-icon { font-size:5em; }
-.fallback-box .ex-name { color:#ff6b00; font-weight:700; font-size:1.1em; text-align:center; }
-.fallback-box .steps { color:#bbb; font-size:0.8em; text-align:center; line-height:1.8; }
-.exercise-info { padding:16px; }
-.exercise-info h3 { font-size:1.1em; font-weight:700; margin-bottom:8px; color:#ff9500; }
-.exercise-info p { font-size:0.88em; color:#ccc; line-height:1.5; margin-bottom:12px; }
+.gif-wrap { width:100%; height:260px; background:#111; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+.gif-wrap img { width:100%; height:100%; object-fit:contain; background:#111; }
+.card-body { padding:16px; }
+.card-body h3 { font-size:1.1em; font-weight:700; margin-bottom:8px; color:#ff9500; }
+.card-body p { font-size:0.88em; color:#ccc; line-height:1.5; margin-bottom:12px; }
 .tags { display:flex; flex-wrap:wrap; gap:6px; }
 .tag { background:#2a2a2a; color:#ff6b00; border-radius:20px; padding:4px 10px; font-size:0.75em; font-weight:600; }
+.loading { text-align:center; padding:40px; color:#888; font-size:1em; }
+.spinner { font-size:2em; animation:spin 1s linear infinite; display:inline-block; margin-bottom:10px; }
+@keyframes spin { to { transform:rotate(360deg); } }
 </style>
 </head>
 <body>
 
-<div class="home-page" id="home">
-  <header>
-    <h1>💪 FitMove</h1>
-    <p>Choisis un muscle à travailler</p>
-  </header>
+<div id="home" class="page visible">
+  <header><h1>💪 FitMove</h1><p>Choisis un muscle à travailler</p></header>
   <div class="muscles-grid">
     <div class="muscle-btn" onclick="showMuscle('pectoraux')"><div class="icon">🫁</div><div class="name">Pectoraux</div></div>
     <div class="muscle-btn" onclick="showMuscle('dos')"><div class="icon">🔙</div><div class="name">Dos</div></div>
@@ -53,346 +48,118 @@ header p { font-size:0.85em; opacity:0.9; margin-top:4px; }
   </div>
 </div>
 
-<div class="exercises-page" id="exercises-page">
-  <header>
-    <h1>💪 FitMove</h1>
-    <p id="header-subtitle"></p>
-  </header>
+<div id="exo-page" class="page">
+  <header><h1>💪 FitMove</h1><p id="sub"></p></header>
   <button class="back-btn" onclick="goBack()">← Retour</button>
-  <div class="section-title" id="section-title"></div>
-  <div id="exercises-list"></div>
+  <div class="section-title" id="stitle"></div>
+  <div id="exo-list"></div>
 </div>
 
 <script>
-const data = {
+const muscles = {
   pectoraux: {
     label: "🫁 Pectoraux",
     exercices: [
-      {
-        nom: "Pompes",
-        desc: "En position planche, mains à largeur d'épaules. Descendez la poitrine vers le sol puis remontez.",
-        tags: ["Pectoraux","Triceps","Épaules"],
-        icon: "🫁",
-        steps: "① Mains sol largeur épaules\n② Corps bien aligné\n③ Descendre poitrine\n④ Repousser sol",
-        gif: "https://wger.de/static/images/exercises/small/14/animated.webp"
-      },
-      {
-        nom: "Développé couché",
-        desc: "Allongé sur un banc, descendez la barre vers la poitrine puis poussez vers le haut.",
-        tags: ["Pectoraux","Triceps"],
-        icon: "🏋️",
-        steps: "① Allongé sur banc\n② Saisir barre\n③ Descendre poitrine\n④ Pousser haut",
-        gif: "https://wger.de/static/images/exercises/small/192/animated.webp"
-      },
-      {
-        nom: "Écarté haltères",
-        desc: "Allongé sur banc, bras en arc de cercle en montant et descendant.",
-        tags: ["Pectoraux"],
-        icon: "💪",
-        steps: "① Allongé banc\n② Bras ouverts\n③ Arc de cercle\n④ Ramener centre",
-        gif: "https://wger.de/static/images/exercises/small/364/animated.webp"
-      },
-      {
-        nom: "Dips pectoraux",
-        desc: "Entre deux barres parallèles, penchez le buste en avant et descendez lentement.",
-        tags: ["Pectoraux","Triceps"],
-        icon: "⬇️",
-        steps: "① Bras tendus barres\n② Pencher buste avant\n③ Fléchir coudes\n④ Remonter",
-        gif: "https://wger.de/static/images/exercises/small/75/animated.webp"
-      }
+      { nom:"Pompes", desc:"En position planche, mains à largeur d'épaules. Descendez la poitrine vers le sol puis remontez.", tags:["Pectoraux","Triceps","Épaules"], gif:"https://media.tenor.com/WTGP_muRIoMAAAAd/push-up-exercise.gif" },
+      { nom:"Développé couché", desc:"Allongé sur un banc, descendez la barre jusqu'à la poitrine puis poussez vers le haut.", tags:["Pectoraux","Triceps"], gif:"https://media.tenor.com/j7oqfQp7EvMAAAAd/bench-press.gif" },
+      { nom:"Écarté haltères", desc:"Allongé sur banc, bras en arc de cercle, montez les haltères au centre puis redescendez.", tags:["Pectoraux"], gif:"https://media.tenor.com/IDm5s5GxJhsAAAAd/dumbbell-fly.gif" },
+      { nom:"Dips pectoraux", desc:"Entre deux barres, penchez le buste en avant et fléchissez les coudes.", tags:["Pectoraux","Triceps"], gif:"https://media.tenor.com/BSTGZbcjkBMAAAAd/dips-chest.gif" }
     ]
   },
   dos: {
     label: "🔙 Dos",
     exercices: [
-      {
-        nom: "Traction",
-        desc: "Suspendez-vous à une barre, tirez votre corps vers le haut jusqu'au menton.",
-        tags: ["Grand dorsal","Biceps"],
-        icon: "⬆️",
-        steps: "① Suspension barre\n② Bras tendus\n③ Tirer corps\n④ Menton dépasse barre",
-        gif: "https://wger.de/static/images/exercises/small/31/animated.webp"
-      },
-      {
-        nom: "Rowing haltère",
-        desc: "Un genou sur banc, tirez l'haltère vers la hanche en gardant le dos plat.",
-        tags: ["Dos","Biceps"],
-        icon: "🔙",
-        steps: "① Genou sur banc\n② Dos horizontal\n③ Tirer haltère\n④ Vers la hanche",
-        gif: "https://wger.de/static/images/exercises/small/197/animated.webp"
-      },
-      {
-        nom: "Soulevé de terre",
-        desc: "Pieds écartés, dos droit, soulevez la barre depuis le sol jusqu'à position debout.",
-        tags: ["Dos","Jambes","Fessiers"],
-        icon: "🏋️",
-        steps: "① Pieds écartés sol\n② Dos plat\n③ Saisir barre\n④ Soulever debout",
-        gif: "https://wger.de/static/images/exercises/small/241/animated.webp"
-      },
-      {
-        nom: "Tirage vertical",
-        desc: "Assis à la machine, tirez la barre vers la poitrine en contractant le dos.",
-        tags: ["Grand dorsal","Biceps"],
-        icon: "⬇️",
-        steps: "① Assis machine\n② Saisir barre large\n③ Tirer vers poitrine\n④ Contracter dos",
-        gif: "https://wger.de/static/images/exercises/small/102/animated.webp"
-      }
+      { nom:"Traction", desc:"Suspendez-vous à une barre, tirez votre corps vers le haut jusqu'au menton.", tags:["Grand dorsal","Biceps"], gif:"https://media.tenor.com/IB7g5HdSRPUAAAAd/pull-up.gif" },
+      { nom:"Rowing haltère", desc:"Un genou sur banc, tirez l'haltère vers la hanche, dos bien plat.", tags:["Dos","Biceps"], gif:"https://media.tenor.com/0mW8FWwkOEoAAAAd/dumbbell-row.gif" },
+      { nom:"Soulevé de terre", desc:"Pieds écartés, dos droit, soulevez la barre depuis le sol jusqu'à la position debout.", tags:["Dos","Jambes","Fessiers"], gif:"https://media.tenor.com/qH_2SbMpqDIAAAAd/deadlift.gif" },
+      { nom:"Tirage vertical", desc:"Assis à la poulie, tirez la barre vers la poitrine en contractant bien le dos.", tags:["Grand dorsal","Biceps"], gif:"https://media.tenor.com/pQ4P7YhJdGYAAAAd/lat-pulldown.gif" }
     ]
   },
   epaules: {
     label: "🏋️ Épaules",
     exercices: [
-      {
-        nom: "Développé militaire",
-        desc: "Poussez les haltères au-dessus de la tête jusqu'à extension complète des bras.",
-        tags: ["Épaules","Triceps"],
-        icon: "🏋️",
-        steps: "① Haltères épaules\n② Dos droit\n③ Pousser au-dessus\n④ Extension complète",
-        gif: "https://wger.de/static/images/exercises/small/62/animated.webp"
-      },
-      {
-        nom: "Élévation latérale",
-        desc: "Debout, levez les bras tendus sur les côtés jusqu'à hauteur des épaules.",
-        tags: ["Épaules latérales"],
-        icon: "↔️",
-        steps: "① Debout haltères\n② Bras le long corps\n③ Lever côtés\n④ Hauteur épaules",
-        gif: "https://wger.de/static/images/exercises/small/73/animated.webp"
-      },
-      {
-        nom: "Élévation frontale",
-        desc: "Levez les bras devant vous alternativement jusqu'à hauteur des épaules.",
-        tags: ["Épaules avant"],
-        icon: "⬆️",
-        steps: "① Debout haltères\n② Bras devant\n③ Lever frontalement\n④ Hauteur épaules",
-        gif: "https://wger.de/static/images/exercises/small/74/animated.webp"
-      },
-      {
-        nom: "Oiseau",
-        desc: "Penché en avant, levez les haltères sur les côtés pour travailler les deltoïdes arrière.",
-        tags: ["Épaules arrière","Dos"],
-        icon: "🐦",
-        steps: "① Penché avant\n② Bras pendants\n③ Lever côtés\n④ Dos bien plat",
-        gif: "https://wger.de/static/images/exercises/small/357/animated.webp"
-      }
+      { nom:"Développé militaire", desc:"Debout ou assis, poussez les haltères au-dessus de la tête jusqu'à extension complète.", tags:["Épaules","Triceps"], gif:"https://media.tenor.com/1_pBpNs9GtEAAAAd/shoulder-press.gif" },
+      { nom:"Élévation latérale", desc:"Debout, levez les bras tendus sur les côtés jusqu'à hauteur des épaules.", tags:["Épaules latérales"], gif:"https://media.tenor.com/3-MMStMJoE8AAAAd/lateral-raise.gif" },
+      { nom:"Élévation frontale", desc:"Levez les haltères devant vous jusqu'à hauteur des épaules, alternativement.", tags:["Épaules avant"], gif:"https://media.tenor.com/tG5UC3RqMBAAAAAd/front-raise.gif" },
+      { nom:"Oiseau", desc:"Penché en avant, levez les haltères sur les côtés pour les deltoïdes arrière.", tags:["Épaules arrière"], gif:"https://media.tenor.com/WKCbAGDMvIgAAAAd/rear-delt-fly.gif" }
     ]
   },
   biceps: {
     label: "💪 Biceps",
     exercices: [
-      {
-        nom: "Curl haltères",
-        desc: "Debout, fléchissez les coudes pour amener les haltères vers les épaules.",
-        tags: ["Biceps"],
-        icon: "💪",
-        steps: "① Debout haltères\n② Coudes collés corps\n③ Fléchir coudes\n④ Serrer biceps",
-        gif: "https://wger.de/static/images/exercises/small/72/animated.webp"
-      },
-      {
-        nom: "Curl marteau",
-        desc: "Même mouvement que le curl mais les paumes se font face durant tout le mouvement.",
-        tags: ["Biceps","Avant-bras"],
-        icon: "🔨",
-        steps: "① Paumes se font face\n② Coudes fixes\n③ Monter haltères\n④ Contrôler descente",
-        gif: "https://wger.de/static/images/exercises/small/194/animated.webp"
-      },
-      {
-        nom: "Curl barre",
-        desc: "Saisissez une barre en supination et fléchissez sans bouger les coudes.",
-        tags: ["Biceps"],
-        icon: "🏋️",
-        steps: "① Saisir barre\n② Paumes vers haut\n③ Fléchir coudes\n④ Contrôler descente",
-        gif: "https://wger.de/static/images/exercises/small/111/animated.webp"
-      },
-      {
-        nom: "Curl concentré",
-        desc: "Assis, coude appuyé sur la cuisse. Fléchissez lentement pour une contraction maximale.",
-        tags: ["Biceps"],
-        icon: "🎯",
-        steps: "① Assis coude cuisse\n② Un haltère\n③ Fléchir lentement\n④ Contracter max",
-        gif: "https://wger.de/static/images/exercises/small/116/animated.webp"
-      }
+      { nom:"Curl haltères", desc:"Debout, fléchissez les coudes pour amener les haltères vers les épaules.", tags:["Biceps"], gif:"https://media.tenor.com/lkAJPh_gnG4AAAAd/bicep-curl.gif" },
+      { nom:"Curl marteau", desc:"Paumes se faisant face, montez les haltères sans tourner les poignets.", tags:["Biceps","Avant-bras"], gif:"https://media.tenor.com/x5HLEi0vdEIAAAAd/hammer-curl.gif" },
+      { nom:"Curl barre", desc:"Saisissez une barre en supination et fléchissez sans bouger les coudes.", tags:["Biceps"], gif:"https://media.tenor.com/QvQmFkDqiWYAAAAd/barbell-curl.gif" },
+      { nom:"Curl concentré", desc:"Assis, coude sur la cuisse. Fléchissez lentement pour une contraction maximale.", tags:["Biceps"], gif:"https://media.tenor.com/JWXpVe-MH4kAAAAd/concentration-curl.gif" }
     ]
   },
   triceps: {
     label: "🦾 Triceps",
     exercices: [
-      {
-        nom: "Extension triceps",
-        desc: "Haltère tenu à deux mains derrière la tête, étendez les bras vers le haut.",
-        tags: ["Triceps"],
-        icon: "🦾",
-        steps: "① Haltère derrière tête\n② Coudes pointés haut\n③ Étendre bras\n④ Contrôler descente",
-        gif: "https://wger.de/static/images/exercises/small/54/animated.webp"
-      },
-      {
-        nom: "Dips banc",
-        desc: "Mains sur un banc derrière vous, fléchissez les coudes pour descendre puis remontez.",
-        tags: ["Triceps","Épaules"],
-        icon: "⬇️",
-        steps: "① Mains sur banc\n② Jambes tendues\n③ Fléchir coudes 90°\n④ Remonter",
-        gif: "https://wger.de/static/images/exercises/small/75/animated.webp"
-      },
-      {
-        nom: "Pushdown poulie",
-        desc: "Coudes collés au corps, poussez la corde ou barre vers le bas jusqu'à extension.",
-        tags: ["Triceps"],
-        icon: "⬇️",
-        steps: "① Face à poulie\n② Coudes fixés corps\n③ Pousser vers bas\n④ Extension complète",
-        gif: "https://wger.de/static/images/exercises/small/86/animated.webp"
-      },
-      {
-        nom: "Skull crusher",
-        desc: "Allongé sur banc, fléchissez les coudes pour amener la barre vers le front.",
-        tags: ["Triceps"],
-        icon: "💀",
-        steps: "① Allongé banc\n② Barre bras tendus\n③ Fléchir vers front\n④ Repousser haut",
-        gif: "https://wger.de/static/images/exercises/small/85/animated.webp"
-      }
+      { nom:"Extension triceps", desc:"Haltère tenu à deux mains derrière la tête, étendez les bras vers le haut.", tags:["Triceps"], gif:"https://media.tenor.com/6A0U4JYQD0gAAAAd/tricep-extension.gif" },
+      { nom:"Dips banc", desc:"Mains sur un banc derrière vous, fléchissez les coudes pour descendre puis remontez.", tags:["Triceps"], gif:"https://media.tenor.com/BSTGZbcjkBMAAAAd/tricep-dips.gif" },
+      { nom:"Pushdown poulie", desc:"Coudes collés au corps, poussez la corde vers le bas jusqu'à extension complète.", tags:["Triceps"], gif:"https://media.tenor.com/Yd4k1bxEp2EAAAAd/tricep-pushdown.gif" },
+      { nom:"Skull crusher", desc:"Allongé sur banc, fléchissez les coudes pour amener la barre vers le front.", tags:["Triceps"], gif:"https://media.tenor.com/HXzZrPHHNzYAAAAd/skull-crusher.gif" }
     ]
   },
   jambes: {
     label: "🦵 Jambes",
     exercices: [
-      {
-        nom: "Squat",
-        desc: "Pieds écartés, descendez les hanches en gardant le dos droit puis remontez.",
-        tags: ["Quadriceps","Fessiers","Ischio"],
-        icon: "🦵",
-        steps: "① Pieds écartés\n② Dos bien droit\n③ Descendre hanches\n④ Remonter explosif",
-        gif: "https://wger.de/static/images/exercises/small/6/animated.webp"
-      },
-      {
-        nom: "Fente avant",
-        desc: "Faites un grand pas en avant, fléchissez les deux genoux à 90° puis revenez.",
-        tags: ["Quadriceps","Fessiers"],
-        icon: "🚶",
-        steps: "① Grand pas avant\n② Dos droit\n③ Plier deux genoux\n④ Revenir position",
-        gif: "https://wger.de/static/images/exercises/small/99/animated.webp"
-      },
-      {
-        nom: "Leg press",
-        desc: "Assis à la machine, poussez la plateforme avec les deux pieds.",
-        tags: ["Quadriceps","Fessiers"],
-        icon: "🦵",
-        steps: "① Assis machine\n② Pieds sur plateforme\n③ Pousser jambes\n④ Ne pas bloquer genoux",
-        gif: "https://wger.de/static/images/exercises/small/57/animated.webp"
-      },
-      {
-        nom: "Mollet debout",
-        desc: "Debout sur une marche, montez sur la pointe des pieds puis redescendez lentement.",
-        tags: ["Mollets"],
-        icon: "⬆️",
-        steps: "① Debout marche\n② Talons dans le vide\n③ Monter pointes\n④ Descendre lentement",
-        gif: "https://wger.de/static/images/exercises/small/140/animated.webp"
-      }
+      { nom:"Squat", desc:"Pieds écartés, descendez les hanches en gardant le dos droit puis remontez.", tags:["Quadriceps","Fessiers"], gif:"https://media.tenor.com/6RHXKRCP4i8AAAAd/squat.gif" },
+      { nom:"Fente avant", desc:"Grand pas en avant, fléchissez les deux genoux à 90° puis revenez.", tags:["Quadriceps","Fessiers"], gif:"https://media.tenor.com/MfFLhXJrJkYAAAAd/lunges.gif" },
+      { nom:"Leg press", desc:"Assis à la machine, poussez la plateforme avec les deux pieds.", tags:["Quadriceps","Fessiers"], gif:"https://media.tenor.com/O1b8-VCLWiQAAAAd/leg-press.gif" },
+      { nom:"Mollet debout", desc:"Debout sur une marche, montez sur la pointe des pieds puis redescendez lentement.", tags:["Mollets"], gif:"https://media.tenor.com/N47_lmLmVqUAAAAd/calf-raise.gif" }
     ]
   },
   abdos: {
     label: "🔥 Abdominaux",
     exercices: [
-      {
-        nom: "Crunch",
-        desc: "Allongé sur le dos, genoux fléchis. Contractez les abdos pour lever les épaules.",
-        tags: ["Abdominaux"],
-        icon: "🔥",
-        steps: "① Allongé dos\n② Genoux fléchis\n③ Lever épaules\n④ Contracter abdos",
-        gif: "https://wger.de/static/images/exercises/small/10/animated.webp"
-      },
-      {
-        nom: "Planche",
-        desc: "Position sur les avant-bras et orteils. Maintenez le corps aligné le plus longtemps possible.",
-        tags: ["Abdominaux","Gainage"],
-        icon: "⏱️",
-        steps: "① Avant-bras sol\n② Corps aligné\n③ Serrer abdos\n④ Tenir position",
-        gif: "https://wger.de/static/images/exercises/small/26/animated.webp"
-      },
-      {
-        nom: "Relevé de jambes",
-        desc: "Allongé, montez les jambes tendues à la verticale puis redescendez sans toucher le sol.",
-        tags: ["Abdominaux bas"],
-        icon: "🦵",
-        steps: "① Allongé dos\n② Jambes tendues\n③ Monter vertical\n④ Descendre contrôle",
-        gif: "https://wger.de/static/images/exercises/small/215/animated.webp"
-      },
-      {
-        nom: "Russian twist",
-        desc: "Assis, pieds levés. Tournez le buste de droite à gauche avec un poids.",
-        tags: ["Abdominaux","Obliques"],
-        icon: "🔄",
-        steps: "① Assis pieds levés\n② Tenir poids\n③ Tourner droite\n④ Tourner gauche",
-        gif: "https://wger.de/static/images/exercises/small/346/animated.webp"
-      }
+      { nom:"Crunch", desc:"Allongé sur le dos, genoux fléchis. Contractez les abdos pour lever les épaules.", tags:["Abdominaux"], gif:"https://media.tenor.com/JIjBNGJYJEkAAAAd/crunch.gif" },
+      { nom:"Planche", desc:"Sur les avant-bras et orteils, maintenez le corps bien aligné.", tags:["Abdominaux","Gainage"], gif:"https://media.tenor.com/WoMg4-DLhFcAAAAd/plank.gif" },
+      { nom:"Relevé de jambes", desc:"Allongé, montez les jambes tendues à la verticale sans toucher le sol.", tags:["Abdominaux bas"], gif:"https://media.tenor.com/aqvMpGSqpCAAAAAd/leg-raises.gif" },
+      { nom:"Russian twist", desc:"Assis, pieds levés. Tournez le buste de droite à gauche avec un poids.", tags:["Abdominaux","Obliques"], gif:"https://media.tenor.com/r58K3EFNq4IAAAAd/russian-twist.gif" }
     ]
   },
   fessiers: {
     label: "🍑 Fessiers",
     exercices: [
-      {
-        nom: "Hip thrust",
-        desc: "Dos appuyé sur banc, poussez les hanches vers le haut en contractant les fessiers.",
-        tags: ["Fessiers","Ischio"],
-        icon: "🍑",
-        steps: "① Dos sur banc\n② Barre sur bassin\n③ Pousser hanches haut\n④ Contracter fessiers",
-        gif: "https://wger.de/static/images/exercises/small/105/animated.webp"
-      },
-      {
-        nom: "Pont fessier",
-        desc: "Allongé sur le dos, genoux fléchis. Poussez les hanches vers le plafond.",
-        tags: ["Fessiers","Lombaires"],
-        icon: "⬆️",
-        steps: "① Allongé dos\n② Genoux fléchis\n③ Pousser hanches haut\n④ Serrer fessiers",
-        gif: "https://wger.de/static/images/exercises/small/104/animated.webp"
-      },
-      {
-        nom: "Squat sumo",
-        desc: "Pieds très écartés, orteils vers l'extérieur. Descendez lentement puis remontez.",
-        tags: ["Fessiers","Adducteurs","Quadriceps"],
-        icon: "🦵",
-        steps: "① Pieds très écartés\n② Orteils dehors\n③ Descendre lent\n④ Remonter serré",
-        gif: "https://wger.de/static/images/exercises/small/100/animated.webp"
-      },
-      {
-        nom: "Donkey kick",
-        desc: "À quatre pattes, poussez un talon vers le plafond en contractant le fessier.",
-        tags: ["Fessiers"],
-        icon: "🦶",
-        steps: "① À quatre pattes\n② Dos plat\n③ Pousser talon haut\n④ Contracter fessier",
-        gif: "https://wger.de/static/images/exercises/small/106/animated.webp"
-      }
+      { nom:"Hip thrust", desc:"Dos appuyé sur banc, poussez les hanches vers le haut en contractant les fessiers.", tags:["Fessiers","Ischio"], gif:"https://media.tenor.com/RWTAFUzHxpUAAAAd/hip-thrust.gif" },
+      { nom:"Pont fessier", desc:"Allongé sur le dos, genoux fléchis. Poussez les hanches vers le plafond.", tags:["Fessiers","Lombaires"], gif:"https://media.tenor.com/XoSfMbdWp1EAAAAd/glute-bridge.gif" },
+      { nom:"Squat sumo", desc:"Pieds très écartés, orteils vers l'extérieur. Descendez lentement.", tags:["Fessiers","Adducteurs"], gif:"https://media.tenor.com/VFxjCagBSXoAAAAd/sumo-squat.gif" },
+      { nom:"Donkey kick", desc:"À quatre pattes, poussez un talon vers le plafond en contractant le fessier.", tags:["Fessiers"], gif:"https://media.tenor.com/S9R_7JZNwVcAAAAd/donkey-kicks.gif" }
     ]
   }
 };
 
-function showMuscle(muscle) {
-  const d = data[muscle];
-  document.getElementById('home').classList.add('hidden');
-  document.getElementById('header-subtitle').textContent = d.label;
-  document.getElementById('section-title').textContent = d.label;
-  const list = document.getElementById('exercises-list');
+function showMuscle(m) {
+  const d = muscles[m];
+  document.getElementById('home').classList.remove('visible');
+  document.getElementById('sub').textContent = d.label;
+  document.getElementById('stitle').textContent = d.label;
+  const list = document.getElementById('exo-list');
   list.innerHTML = '';
   d.exercices.forEach(ex => {
     const card = document.createElement('div');
     card.className = 'exercise-card';
     card.innerHTML = `
-      <div class="gif-container">
+      <div class="gif-wrap">
         <img src="${ex.gif}" alt="${ex.nom}" loading="lazy"
-          onerror="this.outerHTML='<div class=\\'fallback-box\\'><div class=\\'big-icon\\'>${ex.icon}</div><div class=\\'ex-name\\'>${ex.nom}</div><div class=\\'steps\\'>${ex.steps.replace(/\n/g,'<br>')}</div></div>'">
+          onerror="this.style.display='none';this.parentElement.innerHTML='<div style=\\'width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px;\\'><div style=\\'font-size:3.5em;\\'>${ex.tags[0]==='Pectoraux'?'🫁':ex.tags[0]==='Biceps'?'💪':ex.tags[0]==='Triceps'?'🦾':ex.tags[0]==='Épaules'||ex.tags[0]==='Épaules latérales'||ex.tags[0]==='Épaules avant'||ex.tags[0]==='Épaules arrière'?'🏋️':ex.tags[0]==='Grand dorsal'||ex.tags[0]==='Dos'?'🔙':ex.tags[0]==='Abdominaux'||ex.tags[0]==='Gainage'?'🔥':ex.tags[0]==='Fessiers'?'🍑':'🦵'}</div><div style=\\'color:#ff6b00;font-weight:700;font-size:1em;text-align:center;\\'>${ex.nom}</div></div>'">
       </div>
-      <div class="exercise-info">
+      <div class="card-body">
         <h3>${ex.nom}</h3>
         <p>${ex.desc}</p>
         <div class="tags">${ex.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
-      </div>
-    `;
+      </div>`;
     list.appendChild(card);
   });
-  document.getElementById('exercises-page').classList.add('visible');
+  document.getElementById('exo-page').classList.add('visible');
   window.scrollTo(0,0);
 }
 
 function goBack() {
-  document.getElementById('exercises-page').classList.remove('visible');
-  document.getElementById('home').classList.remove('hidden');
+  document.getElementById('exo-page').classList.remove('visible');
+  document.getElementById('home').classList.add('visible');
   window.scrollTo(0,0);
 }
 </script>
