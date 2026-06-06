@@ -7,29 +7,28 @@
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 body { background:#0d0d0d; color:#fff; font-family:-apple-system, sans-serif; min-height:100vh; }
-header { background:linear-gradient(135deg,#ff6b00,#ff9500); padding:20px; text-align:center; position:sticky; top:0; z-index:100; }
+header { background:linear-gradient(135deg,#ff6b00,#ff9500); padding:20px; text-align:center; }
 header h1 { font-size:1.8em; font-weight:800; }
 header p { font-size:0.85em; opacity:0.9; margin-top:4px; }
 .muscles-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; padding:20px; }
-.muscle-btn { background:#1a1a1a; border:2px solid #333; border-radius:16px; padding:20px 10px; text-align:center; cursor:pointer; color:#fff; transition:all 0.2s; }
-.muscle-btn:active { border-color:#ff6b00; background:#2a1500; transform:scale(0.97); }
+.muscle-btn { background:#1a1a1a; border:2px solid #333; border-radius:16px; padding:20px 10px; text-align:center; cursor:pointer; transition:all 0.2s; }
+.muscle-btn:hover { border-color:#ff6b00; background:#2a1500; }
 .muscle-btn .icon { font-size:2.5em; margin-bottom:8px; }
 .muscle-btn .name { font-size:0.95em; font-weight:600; }
 .exercises-page { display:none; padding-bottom:60px; }
 .exercises-page.visible { display:block; }
+.home-page.hidden { display:none; }
 .back-btn { background:#ff6b00; color:#fff; border:none; padding:12px 20px; margin:16px 20px; border-radius:12px; font-size:1em; font-weight:600; cursor:pointer; display:block; width:calc(100% - 40px); }
 .section-title { padding:0 20px 16px; font-size:1.4em; font-weight:800; color:#ff6b00; }
 .exercise-card { background:#1a1a1a; border-radius:16px; margin:0 20px 20px; overflow:hidden; border:1px solid #2a2a2a; }
-.gif-container { width:100%; height:240px; background:#111; display:flex; align-items:center; justify-content:center; overflow:hidden; }
-.gif-container img { width:100%; height:100%; object-fit:contain; background:#111; }
+.gif-container { width:100%; height:220px; background:#111; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+.gif-container img { width:100%; height:100%; object-fit:cover; }
+.no-img { color:#555; font-size:1em; text-align:center; }
 .exercise-info { padding:16px; }
-.exercise-info h3 { font-size:1.15em; font-weight:700; margin-bottom:8px; color:#fff; }
-.exercise-info p { font-size:0.88em; color:#aaa; line-height:1.6; margin-bottom:12px; }
+.exercise-info h3 { font-size:1.1em; font-weight:700; margin-bottom:8px; color:#ff9500; }
+.exercise-info p { font-size:0.88em; color:#ccc; line-height:1.5; margin-bottom:12px; }
 .tags { display:flex; flex-wrap:wrap; gap:6px; }
-.tag { background:#ff6b0022; color:#ff9500; border:1px solid #ff6b0044; border-radius:20px; padding:4px 12px; font-size:0.78em; font-weight:600; }
-.home-page { display:block; }
-.home-page.hidden { display:none; }
-.no-img { color:#555; font-size:0.9em; text-align:center; padding:20px; }
+.tag { background:#2a2a2a; color:#ff6b00; border-radius:20px; padding:4px 10px; font-size:0.75em; font-weight:600; }
 </style>
 </head>
 <body>
@@ -54,9 +53,9 @@ header p { font-size:0.85em; opacity:0.9; margin-top:4px; }
 <div class="exercises-page" id="exercises-page">
   <header>
     <h1>💪 FitMove</h1>
-    <p id="header-subtitle">Exercices</p>
+    <p id="header-subtitle"></p>
   </header>
-  <button class="back-btn" onclick="goBack()">← Retour aux muscles</button>
+  <button class="back-btn" onclick="goBack()">← Retour</button>
   <div class="section-title" id="section-title"></div>
   <div id="exercises-list"></div>
 </div>
@@ -67,34 +66,28 @@ const data = {
     label: "🫁 Pectoraux",
     exercices: [
       {
-        nom: "Pompes classiques",
-        desc: "Au sol, mains à largeur d'épaules. Descendez la poitrine vers le sol puis poussez. Corps bien droit.",
-        tags: ["Pectoraux", "Triceps", "Core"],
-        gif: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Push_up.gif/220px-Push_up.gif"
+        nom: "Pompes",
+        desc: "En position planche, mains à largeur d'épaules. Descendez la poitrine vers le sol puis remontez en gardant le corps droit.",
+        tags: ["Pectoraux", "Triceps", "Épaules"],
+        gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/push-up.gif"
       },
       {
         nom: "Développé couché",
-        desc: "Allongé sur un banc, barre ou haltères. Descendez vers la poitrine puis poussez en haut.",
-        tags: ["Pectoraux", "Triceps", "Épaules"],
-        gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/03/barbell-bench-press.gif"
+        desc: "Allongé sur un banc, barre ou haltères. Descendez jusqu'à la poitrine puis poussez vers le haut.",
+        tags: ["Pectoraux", "Triceps"],
+        gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/barbell-bench-press.gif"
       },
       {
         nom: "Écarté haltères",
-        desc: "Allongé sur banc, bras légèrement fléchis. Ouvrez les bras en arc de cercle vers le bas puis revenez.",
-        tags: ["Pectoraux", "Épaules"],
-        gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/dumbbell-chest-fly.gif"
+        desc: "Allongé sur un banc, haltères en main. Ouvrez les bras en arc de cercle puis ramenez-les au centre.",
+        tags: ["Pectoraux", "Avant"],
+        gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/dumbbell-fly.gif"
       },
       {
-        nom: "Dips pectoraux",
-        desc: "Entre deux barres, penchez le buste vers l'avant. Descendez jusqu'à 90° aux coudes puis remontez.",
+        nom: "Dips",
+        desc: "Entre deux barres parallèles, descendez le buste en avant pour cibler les pectoraux, puis remontez.",
         tags: ["Pectoraux", "Triceps"],
         gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/chest-dip.gif"
-      },
-      {
-        nom: "Pompes inclinées",
-        desc: "Pieds surélevés sur un banc, mains au sol. Cible la partie haute des pectoraux.",
-        tags: ["Pectoraux hauts", "Épaules", "Triceps"],
-        gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/11/decline-push-up.gif"
       }
     ]
   },
@@ -102,34 +95,28 @@ const data = {
     label: "🔙 Dos",
     exercices: [
       {
-        nom: "Tractions",
-        desc: "Suspendu à une barre, tirez le corps vers le haut jusqu'au menton. Descente lente et contrôlée.",
-        tags: ["Grand dorsal", "Biceps", "Trapèzes"],
+        nom: "Traction",
+        desc: "Suspendez-vous à une barre, tirez votre corps vers le haut jusqu'à ce que le menton dépasse la barre.",
+        tags: ["Grand dorsal", "Biceps"],
         gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/pull-up.gif"
       },
       {
         nom: "Rowing haltère",
-        desc: "Un genou et une main sur un banc. Tirez l'haltère vers la hanche, coude collé au corps.",
+        desc: "Un genou sur un banc, tirez l'haltère vers la hanche en gardant le dos droit.",
         tags: ["Dos", "Biceps", "Trapèzes"],
         gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/single-arm-dumbbell-row.gif"
       },
       {
         nom: "Soulevé de terre",
-        desc: "Pieds écartés largeur de hanches, dos droit. Saisissez la barre et poussez dans le sol pour monter debout.",
-        tags: ["Dos", "Jambes", "Fessiers", "Trapèzes"],
-        gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/barbell-deadlift.gif"
+        desc: "Pieds écartés, dos droit, soulevez la barre depuis le sol jusqu'à la position debout.",
+        tags: ["Dos", "Jambes", "Fessiers"],
+        gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/deadlift.gif"
       },
       {
-        nom: "Tirage poulie haute",
+        nom: "Tirage vertical",
         desc: "Assis à la machine, tirez la barre vers la poitrine en écartant les coudes.",
         tags: ["Grand dorsal", "Biceps"],
         gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/lat-pulldown.gif"
-      },
-      {
-        nom: "Rowing barre",
-        desc: "Penché à 45°, barre en main. Tirez vers le nombril en serrant les omoplates ensemble.",
-        tags: ["Dos", "Biceps", "Trapèzes"],
-        gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/barbell-bent-over-row.gif"
       }
     ]
   },
@@ -138,33 +125,27 @@ const data = {
     exercices: [
       {
         nom: "Développé militaire",
-        desc: "Debout, barre à hauteur des épaules. Poussez la barre au-dessus de la tête puis redescendez.",
-        tags: ["Épaules", "Triceps", "Trapèzes"],
-        gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/barbell-overhead-press.gif"
+        desc: "Debout ou assis, poussez la barre ou les haltères au-dessus de la tête jusqu'à extension complète.",
+        tags: ["Épaules", "Triceps"],
+        gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/dumbbell-shoulder-press.gif"
       },
       {
-        nom: "Élévations latérales",
-        desc: "Debout, haltères le long du corps. Levez les bras tendus sur les côtés jusqu'à hauteur des épaules.",
-        tags: ["Deltoïdes latéraux"],
+        nom: "Élévation latérale",
+        desc: "Debout, haltères en main, levez les bras sur les côtés jusqu'à hauteur des épaules.",
+        tags: ["Épaules latérales"],
         gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/dumbbell-lateral-raise.gif"
       },
       {
-        nom: "Élévations frontales",
-        desc: "Haltères devant les cuisses. Levez un bras tendu devant vous jusqu'à hauteur des yeux, alternez.",
-        tags: ["Deltoïdes avant", "Épaules"],
+        nom: "Élévation frontale",
+        desc: "Debout, haltères en main, levez les bras devant vous jusqu'à hauteur des épaules.",
+        tags: ["Épaules avant"],
         gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/dumbbell-front-raise.gif"
       },
       {
-        nom: "Oiseau haltères",
-        desc: "Penché en avant à 90°, levez les bras sur les côtés. Cible les deltoïdes postérieurs.",
-        tags: ["Deltoïdes arrière", "Dos"],
-        gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/dumbbell-rear-delt-fly.gif"
-      },
-      {
-        nom: "Shrugs",
-        desc: "Haltères ou barre en main, haussez les épaules vers les oreilles. Maintenez 1 seconde en haut.",
-        tags: ["Trapèzes", "Épaules"],
-        gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/dumbbell-shrug.gif"
+        nom: "Face pull",
+        desc: "À la poulie haute, tirez la corde vers le visage en écartant les coudes. Cible les deltoïdes arrière.",
+        tags: ["Épaules arrière", "Trapèzes"],
+        gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/face-pull.gif"
       }
     ]
   },
@@ -173,33 +154,27 @@ const data = {
     exercices: [
       {
         nom: "Curl haltères",
-        desc: "Debout, haltères en main. Fléchissez les coudes pour amener les haltères vers les épaules. Descendez lentement.",
-        tags: ["Biceps", "Avant-bras"],
+        desc: "Debout, haltères en main, fléchissez les coudes pour amener les haltères vers les épaules.",
+        tags: ["Biceps"],
         gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/dumbbell-bicep-curl.gif"
       },
       {
+        nom: "Curl marteau",
+        desc: "Même mouvement que le curl classique mais avec les paumes tournées vers l'intérieur.",
+        tags: ["Biceps", "Avant-bras"],
+        gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/hammer-curl.gif"
+      },
+      {
         nom: "Curl barre",
-        desc: "Barre en prise supination, coudes fixes contre le corps. Montez la barre vers les épaules.",
+        desc: "Debout, barre en prise supination, fléchissez les coudes sans bouger les épaules.",
         tags: ["Biceps"],
         gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/barbell-curl.gif"
       },
       {
-        nom: "Curl marteau",
-        desc: "Prise neutre, pouces vers le haut. Fléchissez les coudes alternativement. Travaille aussi le brachio-radial.",
-        tags: ["Biceps", "Brachio-radial", "Avant-bras"],
-        gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/hammer-curl.gif"
-      },
-      {
-        nom: "Curl incliné",
-        desc: "Assis sur banc incliné, bras pendants. Montez les haltères en gardant les coudes derrière le corps.",
-        tags: ["Biceps", "Longue portion"],
-        gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/incline-dumbbell-curl.gif"
-      },
-      {
-        nom: "Curl pupitre",
-        desc: "Bras appuyés sur le pupitre, montez la barre jusqu'en haut. Excellente isolation des biceps.",
-        tags: ["Biceps", "Courte portion"],
-        gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/preacher-curl.gif"
+        nom: "Curl concentré",
+        desc: "Assis, coude appuyé sur la cuisse. Fléchissez lentement pour une contraction maximale.",
+        tags: ["Biceps"],
+        gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/concentration-curl.gif"
       }
     ]
   },
@@ -208,33 +183,27 @@ const data = {
     exercices: [
       {
         nom: "Extension triceps",
-        desc: "Haltère tenu à deux mains au-dessus de la tête. Descendez derrière la nuque en pliant les coudes puis remontez.",
-        tags: ["Triceps", "Longue portion"],
-        gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/dumbbell-tricep-extension.gif"
+        desc: "Debout, haltère tenu à deux mains derrière la tête. Montez et descendez en ne bougeant que les avant-bras.",
+        tags: ["Triceps"],
+        gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/overhead-tricep-extension.gif"
       },
       {
         nom: "Dips banc",
-        desc: "Mains sur un banc derrière vous, pieds au sol. Descendez en pliant les coudes puis remontez.",
-        tags: ["Triceps", "Épaules"],
-        gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/tricep-dip.gif"
-      },
-      {
-        nom: "Barre au front",
-        desc: "Allongé sur banc, barre tenue bras tendus. Descendez vers le front en pliant seulement les coudes.",
+        desc: "Mains sur un banc derrière vous, pieds tendus. Fléchissez les coudes pour descendre puis remontez.",
         tags: ["Triceps"],
-        gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/skull-crusher.gif"
-      },
-      {
-        nom: "Pompes serrées",
-        desc: "Mains rapprochées sous le sternum. Descendez puis poussez. Les coudes restent collés au corps.",
-        tags: ["Triceps", "Pectoraux"],
-        gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/11/close-grip-push-up.gif"
+        gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/bench-dip.gif"
       },
       {
         nom: "Pushdown poulie",
-        desc: "À la poulie haute, coudes fixes contre le corps. Poussez la barre vers le bas jusqu'aux bras tendus.",
+        desc: "À la poulie haute, coudes collés au corps. Poussez la barre vers le bas jusqu'à extension complète.",
         tags: ["Triceps"],
         gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/tricep-pushdown.gif"
+      },
+      {
+        nom: "Skull crusher",
+        desc: "Allongé sur un banc, barre tenue bras tendus. Fléchissez les coudes pour descendre la barre vers le front.",
+        tags: ["Triceps"],
+        gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/skull-crusher.gif"
       }
     ]
   },
@@ -243,33 +212,33 @@ const data = {
     exercices: [
       {
         nom: "Squat",
-        desc: "Pieds largeur d'épaules, barre sur les trapèzes. Descendez cuisses parallèles au sol puis remontez.",
+        desc: "Pieds écartés à largeur d'épaules. Descendez les hanches comme pour s'asseoir, dos droit, puis remontez.",
         tags: ["Quadriceps", "Fessiers", "Ischio-jambiers"],
         gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/barbell-squat.gif"
       },
       {
-        nom: "Fentes",
-        desc: "Faites un grand pas en avant. Descendez le genou arrière vers le sol puis revenez. Alternez les jambes.",
-        tags: ["Quadriceps", "Fessiers", "Équilibre"],
+        nom: "Fente avant",
+        desc: "Faites un grand pas en avant, descendez le genou arrière vers le sol, puis revenez.",
+        tags: ["Quadriceps", "Fessiers"],
         gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/forward-lunge.gif"
       },
       {
         nom: "Leg press",
-        desc: "Assis à la machine, pieds à largeur de hanches. Poussez la plateforme puis revenez lentement.",
-        tags: ["Quadriceps", "Fessiers", "Ischio-jambiers"],
+        desc: "Assis à la machine, pieds sur la plateforme. Poussez en extension puis revenez lentement.",
+        tags: ["Quadriceps", "Fessiers"],
         gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/leg-press.gif"
       },
       {
         nom: "Romanian deadlift",
-        desc: "Debout, barre en main. Descendez en gardant les jambes quasi tendues et le dos droit.",
-        tags: ["Ischio-jambiers", "Fessiers", "Dos"],
+        desc: "Debout, haltères devant les cuisses. Penchez le buste en gardant le dos droit pour étirer les ischio-jambiers.",
+        tags: ["Ischio-jambiers", "Fessiers"],
         gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/romanian-deadlift.gif"
       },
       {
         nom: "Mollets debout",
-        desc: "Debout sur une marche, montez sur la pointe des pieds puis descendez lentement sous le niveau de la marche.",
-        tags: ["Mollets", "Gastrocnémiens"],
-        gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/standing-calf-raise.gif"
+        desc: "Debout, montez sur la pointe des pieds lentement puis redescendez. Possible avec haltères.",
+        tags: ["Mollets"],
+        gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/calf-raise.gif"
       }
     ]
   },
@@ -278,19 +247,19 @@ const data = {
     exercices: [
       {
         nom: "Crunch",
-        desc: "Allongé, genoux fléchis. Contractez les abdos pour lever les épaules du sol. Ne tirez pas sur la nuque.",
-        tags: ["Abdominaux", "Core"],
+        desc: "Allongé sur le dos, genoux fléchis. Contractez les abdos pour soulever les épaules du sol.",
+        tags: ["Abdominaux"],
         gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/crunch.gif"
       },
       {
         nom: "Planche",
-        desc: "En appui sur les avant-bras et les orteils. Corps bien droit. Maintenez la position en respirant.",
-        tags: ["Core", "Abdominaux", "Lombaires"],
+        desc: "En appui sur les avant-bras et les orteils, gardez le corps droit et contractez les abdos. Tenez le plus longtemps possible.",
+        tags: ["Core", "Abdominaux"],
         gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/plank.gif"
       },
       {
         nom: "Relevé de jambes",
-        desc: "Allongé, mains sous les fesses. Montez les jambes tendues à 90° puis descendez sans toucher le sol.",
+        desc: "Allongé sur le dos, montez les jambes tendues à la verticale puis redescendez sans toucher le sol.",
         tags: ["Abdominaux bas", "Hip flexors"],
         gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/leg-raise.gif"
       },
@@ -303,7 +272,7 @@ const data = {
       {
         nom: "Mountain climber",
         desc: "En position de pompe, ramenez les genoux alternativement vers la poitrine rapidement.",
-        tags: ["Core", "Cardio", "Hip flexors"],
+        tags: ["Core", "Cardio"],
         gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/mountain-climber.gif"
       }
     ]
@@ -326,18 +295,18 @@ const data = {
       {
         nom: "Donkey kick",
         desc: "À quatre pattes, poussez un talon vers le plafond en contractant le fessier. Alternez les jambes.",
-        tags: ["Fessiers", "Lombaires"],
+        tags: ["Fessiers"],
         gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/donkey-kick.gif"
       },
       {
-        nom: "Abduction hanche",
-        desc: "Allongé sur le côté, levez la jambe du dessus vers le plafond. Descendez lentement.",
+        nom: "Abduction latérale",
+        desc: "Allongé sur le côté, levez la jambe du dessus vers le haut. Gardez le mouvement lent et contrôlé.",
         tags: ["Fessiers", "Abducteurs"],
         gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/side-lying-hip-abduction.gif"
       },
       {
         nom: "Pont fessier",
-        desc: "Allongé sur le dos, genoux fléchis. Poussez les hanches vers le plafond en contractant les fessiers. Maintenez 2 secondes.",
+        desc: "Allongé sur le dos, genoux fléchis. Poussez les hanches vers le plafond en contractant les fessiers.",
         tags: ["Fessiers", "Lombaires"],
         gif: "https://www.inspireusafoundation.org/wp-content/uploads/2022/01/glute-bridge.gif"
       }
@@ -357,7 +326,7 @@ function showMuscle(muscle) {
     card.className = 'exercise-card';
     card.innerHTML = `
       <div class="gif-container">
-        <img src="${ex.gif}" alt="${ex.nom}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=no-img>🏋️ Image non disponible</div>'">
+        <img src="${ex.gif}" alt="${ex.nom}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'no-img\\'>🏋️ GIF non disponible</div>'">
       </div>
       <div class="exercise-info">
         <h3>${ex.nom}</h3>
@@ -368,13 +337,13 @@ function showMuscle(muscle) {
     list.appendChild(card);
   });
   document.getElementById('exercises-page').classList.add('visible');
-  window.scrollTo(0, 0);
+  window.scrollTo(0,0);
 }
 
 function goBack() {
   document.getElementById('exercises-page').classList.remove('visible');
   document.getElementById('home').classList.remove('hidden');
-  window.scrollTo(0, 0);
+  window.scrollTo(0,0);
 }
 </script>
 </body>
